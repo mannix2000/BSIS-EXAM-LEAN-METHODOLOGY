@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BSIS Exam — Lean Methodology (Answers Revealed)</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;background:#f6f8fb;color:#0f172a;user-select:none;}
+  header{background:#fff;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 6px rgba(0,0,0,.08);}
+  header h1{margin:0;font-size:1.15rem;}
+  header .timer{margin-left:auto;padding:8px 12px;background:#ffeef0;color:#b00020;font-weight:700;border-radius:999px;}
+  main{max-width:980px;margin:18px auto;padding:14px;}
+  .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 6px 16px rgba(13,38,76,0.04);margin-bottom:14px;}
+  label{display:block;margin:8px 0 4px;font-weight:600;}
+  select,input[type=text]{width:100%;padding:8px;border-radius:6px;border:1px solid #d1d5db;}
+  button{background:#1f6feb;color:#fff;border:none;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer;}
+  button.secondary{background:#eef2ff;color:#1f6feb;}
+  .hidden{display:none!important;}
+  .muted{color:#6b7280;font-size:.9rem;}
+  hr{border:0;border-top:1px solid #efefef;margin:12px 0;}
+  .question-block{margin-bottom:10px;}
+  .feedback{margin-top:4px;font-size:.9rem;}
+  .correct{color:green;}
+  .wrong{color:#b91c1c;}
+</style>
+</head>
+<body>
+<header>
+  <h1>BSIS Exam — Lean Methodology</h1>
+  <div class="timer" id="timer">40:00</div>
+</header>
+
+<main>
+  <section class="card" id="accessCodeSection">
+    <label for="examCodeInput">Enter Exam Access Code:</label>
+    <input id="examCodeInput" type="text" placeholder="Enter code here" autocomplete="off" />
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+      <button type="button" id="examCodeBtn">Start Exam</button>
+      <div style="margin-left:auto" class="muted">Enter code provided by your instructor.</div>
+    </div>
+    <p id="codeError" class="muted" style="color:#b00020;display:none;margin-top:8px;">Incorrect code. Please try again.</p>
+  </section>
+
+  <form id="examForm" class="card hidden" autocomplete="off">
+    <label for="studentName">Student Name</label>
+    <input id="studentName" type="text" name="studentName" placeholder="Last name, First name" />
+    <hr>
+
+    <div id="questionContainer"></div>
+
+    <hr>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button type="submit" id="submitBtn">Submit Answers</button>
+      <button type="button" class="secondary" id="downloadBtn" disabled>Download Answers (.txt)</button>
+      <div style="margin-left:auto" class="muted">Fill your name before submitting.</div>
+    </div>
+
+    <p id="submitMsg" class="muted" style="display:none;margin-top:8px;color:green;"></p>
+  </form>
+</main>
+
+<script>
+(function(){
+  const ACCESS_CODE = "MANNIXBPM2025";
+  const INITIAL_SECONDS = 40*60;
+  const PASS_PERCENT = 75;
+
+  const timerEl=document.getElementById('timer');
+  const accessSection=document.getElementById('accessCodeSection');
+  const examCodeInput=document.getElementById('examCodeInput');
+  const examCodeBtn=document.getElementById('examCodeBtn');
+  const codeError=document.getElementById('codeError');
+  const examForm=document.getElementById('examForm');
+  const questionContainer=document.getElementById('questionContainer');
+  const downloadBtn=document.getElementById('downloadBtn');
+  const submitMsg=document.getElementById('submitMsg');
+
+  let totalSeconds=INITIAL_SECONDS,timerInterval=null,examStarted=false;
+
+  // === Questions and answers ===
+  const qa=[
+    {q:"Lean methodology primarily aims to:",opts:["Maximize waste to increase inventory","Minimize waste and maximize customer value","Increase process complexity","Reduce customer involvement"],ans:"B"},
+    {q:"Lean originated from which production system?",opts:["Six Sigma System","Toyota Production System (TPS)","Agile Manifesto","Ford Assembly Line"],ans:"B"},
+    {q:"Core principle 'Define Value' means:",opts:["Decide what the manager values","Identify what the customer wants","Only track internal metrics","Map out the financial cost"],ans:"B"},
+    {q:"Mapping the value stream helps to:",opts:["Add more steps to the process","Identify and challenge wasted steps","Increase inventory","Reduce customer feedback"],ans:"B"},
+    {q:"Creating flow in Lean aims to:",opts:["Ensure product moves smoothly through the process","Batch all work into large lots","Increase waiting times","Add more approvals"],ans:"A"},
+    {q:"Establishing pull means:",opts:["Producing based on forecast only","Letting customers 'pull' products based on demand","Pushing inventory to stores","Eliminating customer feedback"],ans:"B"},
+    {q:"Pursue Perfection in Lean refers to:",opts:["Stop improving after one change","Continuous improvement of the process","Only focus on profits","Avoid involving employees"],ans:"B"},
+    {q:"MUDA in Lean refers to:",opts:["A Japanese tool for mapping","Waste or activities that do not add value","A type of KPI","A training method"],ans:"B"},
+    {q:"Which of these is a type of waste (Muda)?",opts:["Innovation","Waiting","Marketing","Recruitment"],ans:"B"},
+    {q:"Overproduction waste means:",opts:["Producing just-in-time","Producing more than needed or earlier than required","Reducing inventory","Eliminating defects"],ans:"B"},
+    {q:"Waiting waste refers to:",opts:["Immediate processing","Idle time when resources are not ready for next step","Increased flow","Improved customer service"],ans:"B"},
+    {q:"Transport as waste is about:",opts:["Excess movement of materials/products/information","Improving delivery times","Customer transport services","Internal communication"],ans:"A"},
+    {q:"Overprocessing waste is when:",opts:["You do only minimal work","You do more work or use more resources than necessary","You eliminate steps","You standardize work"],ans:"B"},
+    {q:"Inventory waste results in:",opts:["Faster cash flow","Tied up capital, risk of obsolescence","Better responsiveness","Lower storage costs"],ans:"B"},
+    {q:"Motion waste involves:",opts:["Machine downtime only","Unnecessary movement by people (reaching, walking)","Transport between warehouses","Waiting for approvals"],ans:"B"},
+    {q:"Defects as waste cause:",opts:["Improved quality","Rework, repair and loss of customer trust","Fewer inspections","Less training needs"],ans:"B"},
+    {q:"The 5S method includes which of these elements?",opts:["Sort, Set in Order, Shine, Standardize, Sustain","Study, Solve, Support, Simplify, Share","Scan, Store, Ship, Sell, Support","Select, Schedule, Sync, Sustain, Simplify"],ans:"A"},
+    {q:"Kaizen is best described as:",opts:["A one-time major change","Small continuous improvements by employees","A quality certification","A financial strategy"],ans:"B"},
+    {q:"Kanban primarily is used for:",opts:["Managing hiring processes","Visual workflow management and aligning production to demand","Measuring customer satisfaction","Testing products"],ans:"B"},
+    {q:"Value Stream Mapping helps to:",opts:["Hide inefficiencies","Identify wasteful steps in a process","Replace the need for training","Create defects intentionally"],ans:"B"},
+    {q:"Poka-Yoke refers to:",opts:["Waste identification","Error-proofing to prevent mistakes","A lean KPI","A stakeholder group"],ans:"B"},
+    {q:"In manufacturing, Lean helps to:",opts:["Increase overproduction","Make production more efficient","Reduce product quality","Eliminate customer focus"],ans:"B"},
+    {q:"In healthcare, Lean techniques are used to:",opts:["Increase patient wait times","Improve patient flow and reduce waiting","Avoid staff training","Increase paperwork"],ans:"B"},
+    {q:"Lean-inspired methods applied in IT often include:",opts:["Waterfall and Big Bang","Agile and Kanban","Manual inventory counting","Large-batch deliveries"],ans:"B"},
+    {q:"One benefit of applying Lean in service industries is:",opts:["Slower customer service","More wasteful steps","Faster and more efficient customer service","More inventory"],ans:"C"},
+    {q:"Which statement summarizes Lean's focus?",opts:["Maximize cost and minimize customer contact","Value creation, efficiency, and continuous improvement","Reduce employee involvement","Increase overproduction"],ans:"B"},
+    {q:"5S 'Sustain' aims to:",opts:["Make the practice temporary","Encourage discipline and continuous application","Eliminate standards","Delay improvements"],ans:"B"},
+    {q:"Kaizen encourages:",opts:["Top-down orders only","Employees to make small daily improvements","Stopping changes after launch","Reducing feedback loops"],ans:"B"},
+    {q:"Kanban boards are useful because they:",opts:["Hide work status","Provide a visual way to manage workflow and limit work in progress","Increase batch sizes","Replace customer input"],ans:"B"},
+    {q:"Value Stream Mapping is used to visualize:",opts:["Only financial data","Entire process steps and information flow to find wastes","Employee attendance","Brand image"],ans:"B"},
+    {q:"Poka-Yoke prevents mistakes by:",opts:["Punishing staff","Designing fail-safes or error-proofing steps","Delaying production","Ignoring defects"],ans:"B"},
+    {q:"Eliminating waste improves:",opts:["Process lead times and quality","Only marketing","Only finance reports","Employee headcount only"],ans:"A"},
+    {q:"An example Lean tool is:",opts:["5S","Random guesswork","Uncontrolled inventory","Unplanned overtime"],ans:"A"},
+    {q:"Continuous improvement in Lean is known as:",opts:["Kaizen","Muda","Kanban","Audit"],ans:"A"},
+    {q:"Which is NOT one of the seven wastes (classic list)?",opts:["Motion","Leadership","Transport","Defects"],ans:"B"},
+    {q:"Which Lean principle focuses on customer demand driving production?",opts:["Flow","Pull","Perfection","Value definition"],ans:"B"},
+    {q:"A quick win in Lean most likely involves:",opts:["Large capital investment","Small process changes that reduce waste","Hiring more staff","Increasing inventory"],ans:"B"},
+    {q:"Lean adoption in IT is commonly seen in:",opts:["Hero-coding and isolated work","Use of Kanban boards and Agile practices","Only long waterfall projects","Removing retrospectives"],ans:"B"},
+    {q:"The overall goal of Lean is to:",opts:["Keep the same processes forever","Eliminate waste and optimize workflow to deliver value","Delay customer feedback","Increase unnecessary approvals"],ans:"B"}
+  ];
+
+  function buildQuestions(){
+    questionContainer.innerHTML='';
+    qa.forEach((item,i)=>{
+      const wrap=document.createElement('div');
+      wrap.className='question-block';
+      const label=document.createElement('label');
+      label.textContent=`${i+1}. ${item.q}`;
+      const sel=document.createElement('select');
+      sel.name=`q${i+1}`;
+      const optEmpty=document.createElement('option');
+      optEmpty.value=''; optEmpty.textContent='Select answer';
+      sel.appendChild(optEmpty);
+      const letters=['A','B','C','D'];
+      for(let j=0;j<4;j++){
+        const o=document.createElement('option');
+        o.value=letters[j];
+        o.textContent=`${letters[j]}. ${item.opts[j]}`;
+        sel.appendChild(o);
+      }
+      wrap.appendChild(label);
+      wrap.appendChild(sel);
+      questionContainer.appendChild(wrap);
+    });
+  }
+
+  function shuffleBlocks(){
+    const nodes=Array.from(questionContainer.children);
+    for(let i=nodes.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      questionContainer.appendChild(nodes[j]);
+      nodes.splice(j,1);
+    }
+  }
+
+  function updateTimer(){
+    const m=Math.floor(totalSeconds/60),s=totalSeconds%60;
+    timerEl.textContent=(m<10?'0'+m:m)+':'+(s<10?'0'+s:s);
+  }
+  function startTimer(){
+    clearInterval(timerInterval);
+    timerInterval=setInterval(()=>{
+      totalSeconds--;
+      if(totalSeconds<=0){clearInterval(timerInterval);lockExam();}
+      updateTimer();
+    },1000);
+  }
+  function lockExam(){
+    examForm.querySelectorAll('select,input').forEach(el=>el.disabled=true);
+    submitMsg.style.display='block';submitMsg.textContent='Time is up. Exam ended.';
+  }
+
+  function startExam(){
+    const code=(examCodeInput.value||'').trim().toUpperCase();
+    if(code===ACCESS_CODE.toUpperCase()){
+      codeError.style.display='none';
+      buildQuestions(); shuffleBlocks();
+      accessSection.classList.add('hidden'); examForm.classList.remove('hidden');
+      examStarted=true; startTimer();
+    } else codeError.style.display='block';
+  }
+  examCodeBtn.onclick=startExam;
+  examCodeInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();startExam();}});
+
+  function strictReload(){if(examStarted)location.reload();}
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)strictReload();});
+  window.addEventListener('blur',()=>{if(examStarted)strictReload();});
+
+  document.addEventListener('contextmenu',e=>e.preventDefault());
+  ['copy','cut','selectstart'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault()));
+  document.addEventListener('keydown',e=>{
+    if((e.ctrlKey||e.metaKey)&&['c','x','u','s','a','p'].includes(e.key.toLowerCase()))e.preventDefault();
+  });
+
+  examForm.addEventListener('submit',e=>{
+    e.preventDefault();
+    const name=document.getElementById('studentName').value.trim();
+    if(!name){alert('Please enter your name before submitting.');return;}
+    let correctCount=0;let output=`Student Name: ${name}\n\n`;
+    qa.forEach((item,i)=>{
+      const sel=examForm.querySelector(`[name=q${i+1}]`);
+      const ans=sel?sel.value:'';
+      output+=`Q${i+1}: ${ans}\n`;
+      const fb=document.createElement('div');
+      fb.className='feedback';
+      if(ans===item.ans){correctCount++;fb.textContent='✅ Correct';fb.classList.add('correct');}
+      else{
+        const correctText=item.opts[['A','B','C','D'].indexOf(item.ans)];
+        fb.innerHTML=`❌ Wrong — Correct answer: <b>${item.ans}. ${correctText}</b>`;
+        fb.classList.add('wrong');
+      }
+      sel.parentNode.appendChild(fb);
+      sel.disabled=true;
+    });
+    const percent=Math.round((correctCount/qa.length)*100);
+    const status=percent>=PASS_PERCENT?'Passed':'Failed';
+    alert(`Your score: ${correctCount}/${qa.length} (${percent}%) – ${status}`);
+    output+=`\nScore: ${correctCount}/${qa.length} (${percent}%) – ${status}\n`;
+    window._latestExamData=output;
+    downloadBtn.disabled=false;
+    submitMsg.style.display='block';
+    submitMsg.textContent='Answers and feedback shown below. You can download results.';
+  });
+
+  downloadBtn.onclick=()=>{
+    const data=window._latestExamData||'';if(!data){alert('Submit first.');return;}
+    const blob=new Blob([data],{type:'text/plain'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const n=(document.getElementById('studentName').value||'answers').replace(/\s+/g,'_');
+    a.href=url;a.download=`${n}_answers.txt`;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},2000);
+  };
+
+  updateTimer();
+})();
+</script>
+</body>
+</html>
